@@ -1,0 +1,6 @@
+Alimento,Arroz,5,kg
+Alimento,Huevo,30,canastas
+Alimento,Carne,40,kg
+Medicina,Acetaminofén,50,cajas
+Medicina,Noxpirín,30,cajas
+Medicina,Ibuprofeno,40,cajas
