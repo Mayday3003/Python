@@ -1,0 +1,7 @@
+prefix=/home/Mayday3003/Documents/Github-repos/Python/.conda
+includedir=${prefix}/include
+ 
+Name: XCMiscProto
+Description: XCMisc extension headers
+Version: 1.2.2
+Cflags: -I${includedir}

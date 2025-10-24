@@ -1,0 +1,13 @@
+prefix=/home/Mayday3003/Documents/Github-repos/Python/.conda
+exec_prefix=/home/Mayday3003/Documents/Github-repos/Python/.conda
+libdir=/home/Mayday3003/Documents/Github-repos/Python/.conda/lib
+sharedlibdir=/home/Mayday3003/Documents/Github-repos/Python/.conda/lib
+includedir=/home/Mayday3003/Documents/Github-repos/Python/.conda/include
+
+Name: zlib
+Description: zlib compression library
+Version: 1.2.13
+
+Requires:
+Libs: -L${libdir} -L${sharedlibdir} -lz
+Cflags: -I${includedir}

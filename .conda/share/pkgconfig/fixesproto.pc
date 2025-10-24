@@ -1,0 +1,8 @@
+prefix=/home/Mayday3003/Documents/Github-repos/Python/.conda
+includedir=${prefix}/include
+
+Name: FixesProto
+Description: X Fixes extension headers
+Version: 6.1
+Cflags: -I${includedir}
+Requires: xextproto >= 7.0.99.1

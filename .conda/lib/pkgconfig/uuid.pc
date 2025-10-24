@@ -1,0 +1,11 @@
+prefix=/home/Mayday3003/Documents/Github-repos/Python/.conda
+exec_prefix=/home/Mayday3003/Documents/Github-repos/Python/.conda
+libdir=/home/Mayday3003/Documents/Github-repos/Python/.conda/lib
+includedir=/home/Mayday3003/Documents/Github-repos/Python/.conda/include
+
+Name: uuid
+Description: Universally unique id library
+Version: 2.32.1
+Requires:
+Cflags: -I${includedir}/uuid
+Libs: -L${libdir} -luuid
