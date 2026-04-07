@@ -21,17 +21,7 @@ Luego analiza la complejidad de tu solución.
 #   entrada: [3, 3, 4, 2, 3, 3, 5, 3, 3]
 #   salida: 3 (aparece 6 veces, n/2 = 4.5)
 #
-def elemento_mayoritario(arr:list[int])->int:
-    cantidad_elementos = {}
-
-    for i in arr:
-        if i not in cantidad_elementos:
-            cantidad_elementos[i] = 1
-        else: 
-            cantidad_elementos[1] += 1
-    
-    return max(cantidad_elementos)
-        
+def elemento_mayoritario(arr:list[int])->int:        
     pass
 
 
@@ -45,6 +35,13 @@ def elemento_mayoritario(arr:list[int])->int:
 #   salida: 6 (el subarreglo [4, -1, 2, 1] tiene suma 6)
 #
 def suma_maxima_subarreglo(arr):
+    max_sum = 0
+   
+    for i in range(len(arr)):
+        for j in range(0,len(arr)-1,-1):
+         max_sum += arr[i]
+        
+       
     pass
 
 
