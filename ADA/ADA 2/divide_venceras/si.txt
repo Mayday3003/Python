@@ -1,0 +1,944 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# EJERCICIO 1: Verificar si un Arreglo Está Ordenado
+# ═══════════════════════════════════════════════════════════════════════════
+#
+# Problema: Determinar si un arreglo está ordenado de menor a mayor
+#           usando divide y vencerás.
+#
+# Ejemplo:
+#   [1, 3, 5, 7, 9]     → True
+#   [1, 3, 2, 7, 9]     → False
+#   [5]                  → True
+#   []                   → True
+#
+# Idea D&V:
+#   - Dividir el arreglo en dos mitades
+#   - Verificar que cada mitad esté ordenada
+#   - Verificar que el último de la izquierda <= primero de la derecha
+#
+# Complejidad: O(n)
+#
+
+def esta_ordenado(arr, izq: int = 0, der: int = None)-> bool:
+    if der is None:
+        der = len(arr) -1
+        
+    if izq >= der:
+        return True
+    mid = (izq + der)  // 2
+
+
+    
+    izquierda = esta_ordenado(arr, izq , mid)
+    if izquierda is False:
+        return False
+    derecha = esta_ordenado(arr, mid + 1  ,der)    
+    if derecha is False: 
+        return False
+    
+    if arr[mid] <= (arr[mid+ 1] ):
+        return True
+    else:
+        return False
+
+
+
+
+esta_ordenado([1,2,4,5,7,9])
+
+
+def esta_ordenado_solucion(arr, izq=0, der=None):
+    if der is None:
+        der = len(arr) - 1
+
+    # Caso base: 0 o 1 elementos siempre están ordenados
+    if izq >= der:
+        return True
+
+    medio = (izq + der) // 2
+
+    # Vencer: ambas mitades deben estar ordenadas
+    if not esta_ordenado_solucion(arr, izq, medio):
+        return False
+    if not esta_ordenado_solucion(arr, medio + 1, der):
+        return False
+
+    # Combinar: el borde entre mitades debe ser consistente
+    return arr[medio] <= arr[medio + 1]
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# EJERCICIO 2: Encontrar el Máximo en un Arreglo Rotado
+# ═══════════════════════════════════════════════════════════════════════════
+#
+# Problema: Un arreglo ordenado fue rotado k posiciones. Encontrar
+#           el elemento máximo.
+#
+#           Un arreglo rotado es uno que estaba ordenado y se le
+#           movieron los primeros k elementos al final.
+#           Ej: [1,2,3,4,5] rotado 3 → [4,5,1,2,3]
+#
+# Ejemplo:
+#   [4, 5, 6, 7, 1, 2, 3]  → 7
+#   [3, 1, 2]               → 3
+#   [1, 2, 3, 4, 5]         → 5  (sin rotación)
+#   [2, 1]                  → 2
+#
+# Idea D&V:
+#   - Si el subarreglo está ordenado (arr[izq] <= arr[der]),
+#     el máximo es arr[der]
+#   - Si no, el máximo está en la mitad que contiene el "quiebre"
+#   - Comparar arr[medio] con arr[izq] para decidir qué mitad explorar
+#
+# Fuerza bruta: O(n)
+# D&V: O(log n)
+#
+
+def maximo_rotado(arr, izq = 0, der = None, mayor_actual = float('-inf')):
+    """Encuentra el máximo en un arreglo ordenado rotado."""
+
+    if der is None:
+        der = len(arr) - 1
+
+    if arr[izq] <= arr[der]:
+        return arr[der]
+    
+    if izq >= der:
+        return mayor_actual
+    
+    mid = (izq + der) // 2 
+
+    if arr[mid] > arr[izq]:
+        maximo_rotado(arr, mid, der,   )
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+def maximo_rotado_solucion(arr):
+    def dyv(arr, izq, der):
+        # Caso base: un solo elemento
+        if izq == der:
+            return arr[izq]
+
+        # Si el subarreglo está ordenado, el máximo es el último
+        if arr[izq] <= arr[der]:
+            return arr[der]
+
+        medio = (izq + der) // 2
+
+        # El máximo está donde ocurre el quiebre
+        # Si la mitad izquierda está ordenada, el quiebre está a la derecha
+        if arr[izq] <= arr[medio]:
+            return dyv(arr, medio + 1, der) if arr[medio] < arr[medio + 1] \
+                else arr[medio] if medio + 1 > der or arr[medio] > arr[medio + 1] \
+                else dyv(arr, medio + 1, der)
+        else:
+            return dyv(arr, izq, medio)
+
+    if not arr:
+        return None
+    return dyv(arr, 0, len(arr) - 1)
+
+
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# EJERCICIO 3: Piso de un Número en Arreglo Ordenado
+# ═══════════════════════════════════════════════════════════════════════════
+#
+# Problema: Dado un arreglo ordenado y un valor x, encontrar el mayor
+#           elemento que sea menor o igual a x (el "piso" de x).
+#
+# Ejemplo:
+#   arr = [1, 2, 4, 6, 10, 12, 14], x = 7   → 6
+#   arr = [1, 2, 4, 6, 10, 12, 14], x = 10  → 10
+#   arr = [1, 2, 4, 6, 10, 12, 14], x = 0   → None (no hay piso)
+#   arr = [1, 2, 4, 6, 10, 12, 14], x = 14  → 14
+#
+# Idea D&V:
+#   - Búsqueda binaria modificada
+#   - Si arr[medio] == x, encontramos el piso exacto
+#   - Si arr[medio] < x, es candidato a piso, pero puede haber uno mejor
+#     a la derecha
+#   - Si arr[medio] > x, buscar a la izquierda
+#
+# Fuerza bruta: O(n)
+# D&V: O(log n)
+#
+
+def piso(arr, x, izq = 0,der = None):
+    """Encuentra el piso de x en el arreglo ordenado."""
+    if der is None: 
+        der = len(arr) - 1
+
+    if izq >= der:
+        return arr[izq]
+
+    mitad = (izq + der) // 2
+
+    if arr[mitad] == x:
+        return x
+    
+    if arr[mitad] < x:
+        posible = arr[mitad]
+        exploracion_derecha = piso(arr,x,mitad+1,der)
+        if exploracion_derecha > posible: 
+            return exploracion_derecha
+        else: 
+            return posible
+
+    else:
+        return piso(arr,x,izq,mitad-1)
+
+
+    pass
+
+
+def piso_solucion(arr, x):
+    def dyv(arr, x, izq, der):
+        if izq > der:
+            return None
+
+        # Si x es menor que el primer elemento, no hay piso
+        if x < arr[izq]:
+            return None
+
+        medio = (izq + der) // 2
+
+        if arr[medio] == x:
+            return arr[medio]
+
+        if arr[medio] < x:
+            # arr[medio] es candidato, pero puede haber uno mejor a la derecha
+            candidato_der = dyv(arr, x, medio + 1, der)
+            if candidato_der is not None:
+                return candidato_der
+            return arr[medio]
+        else:
+            return dyv(arr, x, izq, medio - 1)
+
+    if not arr:
+        return None
+    return dyv(arr, x, 0, len(arr) - 1)
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# EJERCICIO 4: Revertir un Arreglo
+# ═══════════════════════════════════════════════════════════════════════════
+#
+# Problema: Revertir un arreglo in-place usando divide y vencerás.
+#
+# Ejemplo:
+#   [1, 2, 3, 4, 5]  → [5, 4, 3, 2, 1]
+#   [10, 20, 30]      → [30, 20, 10]
+#   [7]               → [7]
+#
+# Idea D&V:
+#   - Intercambiar el primer y último elemento
+#   - Recursivamente revertir el subarreglo interno
+#
+# Complejidad: O(n)
+#
+
+def revertir(arr, izq = 0, der = None):
+    """Revierte el arreglo in-place usando D&V."""
+    if len(arr) == 0 or len(arr) == 1:
+        return arr[0]
+    
+
+    if der is None:
+        der = len(arr) - 1
+    
+    if izq >= der:
+        return arr
+    
+    arr[izq], arr[der] = arr[der], arr[izq]
+    
+    revertir(arr,izq +1,der -1)
+    
+
+
+    pass
+# ═══════════════════════════════════════════════════════════════════════════
+# EJERCICIO 5: Verificar Palíndromo
+# ═══════════════════════════════════════════════════════════════════════════
+#
+# Problema: Determinar si un string es palíndromo usando D&V.
+#           (Se lee igual de izquierda a derecha que de derecha a izquierda)
+#
+# Ejemplo:
+#   "anilina"    → True
+#   "reconocer"  → True
+#   "hola"       → False
+#   "aba"        → True
+#   "a"          → True
+#
+# Idea D&V:
+#   - Comparar el primer y último carácter
+#   - Si son iguales, verificar recursivamente el substring interno
+#   - Si son diferentes, no es palíndromo
+#
+# Complejidad: O(n)
+#
+
+def es_palindromo(s, izq = 0, der = None):
+    """Verifica si el string es palíndromo usando D&V."""
+    if der is None:
+        der = len(arr) -1
+
+    if izq >= der:
+        return True
+    
+    if arr[izq] != arr[der]:
+        return False
+    
+    es_palindromo(s, izq + 1, der - 1)
+    
+    pass
+
+
+
+
+print("""
+┌────┬──────────────────────────┬──────────┬──────────────┐
+│ #  │ Ejercicio                │ F.Bruta  │ D&V          │
+├────┼──────────────────────────┼──────────┼──────────────┤
+│ 1  │ Verificar ordenado       │ O(n)     │ O(n)         │
+│ 2  │ Máximo en rotado         │ O(n)     │ O(log n)     │
+│ 3  │ Piso en arreglo ordenado │ O(n)     │ O(log n)     │
+│ 4  │ Revertir arreglo         │ O(n)     │ O(n)         │
+│ 5  │ Palíndromo               │ O(n)     │ O(n)         │
+└────┴──────────────────────────┴──────────┴──────────────┘
+""")
+
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# EJERCICIO 6: Encontrar el Mínimo en un Arreglo Rotado
+# ═══════════════════════════════════════════════════════════════════════════
+#
+# Problema: Un arreglo ordenado fue rotado k posiciones. Encontrar el mínimo.
+#
+# Ejemplo:
+#   [4,5,6,7,1,2,3] → 1
+#   [1,2,3,4,5]     → 1
+#   [2,1]           → 1
+#    
+
+# D&V: O(log n)
+
+   
+def minimo_rotado(arr, izq = 0, der = None):
+    
+    if der is None:
+        der = len(arr) -1
+        
+    if len(arr) == 1:
+        return arr[0]
+        
+        
+    if arr[izq] <= arr[der]:
+        return arr[izq]
+    
+
+    
+    mid = (izq + der) // 2
+
+    if arr[mid] >= arr[der]:
+        return minimo_rotado(arr, mid + 1, der)
+    else:
+        explorar_izq = minimo_rotado(arr, izq, mid -1)
+        return min(arr[mid], explorar_izq)
+        
+
+
+
+print(minimo_rotado([3, 1, 2]))
+
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# EJERCICIO 7: Contar Ocurrencias de x en Arreglo Ordenado
+# ═══════════════════════════════════════════════════════════════════════════
+#
+# Problema: Dado arr ordenado y x, contar cuántas veces aparece x.
+#
+# Ejemplo:
+#   arr=[1,2,2,2,3,4], x=2 → 3
+#   arr=[1,1,1,1], x=1      → 4
+#   arr=[1,2,3], x=5        → 0
+#
+# D&V: O(log n)
+
+def repeticiones_numero(arr: list, x: int, izq = 0, der =  None):
+    if der is None:
+        der = len(arr) - 1
+    if izq > der:
+        return 0
+
+    mid = (izq + der) // 2
+
+    # tu misma lógica, en versión larga:
+    if arr[mid] == x:
+        cuenta_mid = 1
+    else:
+        cuenta_mid = 0
+
+    izquierda = repeticiones_numero(arr, x, izq, mid - 1)
+    derecha = repeticiones_numero(arr, x, mid + 1, der)
+
+    return cuenta_mid + izquierda + derecha
+
+
+repeticiones_numero([2,1,2,2,2],2)
+    
+def repeticiones_numero(arr: list, x: int, izq = 0, der =  None):
+    if der is None:
+        der = len(arr) - 1
+    if izq > der:
+        return 0
+
+    mid = (izq + der) // 2
+
+    # tu misma lógica, en versión larga:
+    if arr[mid] == x:
+        cuenta_mid = 1
+    else:
+        cuenta_mid = 0
+
+    izquierda = repeticiones_numero(arr, x, izq, mid - 1)
+    derecha = repeticiones_numero(arr, x, mid + 1, der)
+
+    return cuenta_mid + izquierda + derecha
+
+
+repeticiones_numero([1,2,2,21,1,1,1],1)
+    
+
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# EJERCICIO 8: Encontrar un Pico en un Arreglo
+# ═══════════════════════════════════════════════════════════════════════════
+#
+# Problema: Encontrar un índice i tal que arr[i] >= vecinos.
+#
+# Ejemplo:
+#   [1,3,20,4,1,0] → índice 2 (valor 20)
+#   [10,20,15,2,23,90,67] → puede ser 1 o 5
+#
+# D&V: O(log n)
+
+def encontrar_pico_solucion(arr):
+    if not arr:
+        return None
+
+    def dyv(lo, hi):
+        if lo == hi:
+            return lo
+
+        mid = (lo + hi) // 2
+        if arr[mid] < arr[mid + 1]:
+            return dyv(mid + 1, hi)
+        return dyv(lo, mid)
+
+    idx = dyv(0, len(arr) - 1)
+    return idx, arr[idx]
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# EJERCICIO 9: Potencia Rápida (x^n)
+# ═══════════════════════════════════════════════════════════════════════════
+#
+# Problema: Calcular x^n usando D&V.
+#
+# Ejemplo:
+#   x=2, n=10 → 1024
+#   x=3, n=5  → 243
+#   x=2, n=0  → 1
+#
+# D&V: O(log n)
+
+def potencia_rapida_solucion(x, n):
+    if n == 0:
+        return 1
+    if n < 0:
+        return 1 / potencia_rapida_solucion(x, -n)
+
+    mitad = potencia_rapida_solucion(x, n // 2)
+    if n % 2 == 0:
+        return mitad * mitad
+    return mitad * mitad * x
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# EJERCICIO 10: Elemento Mayoritario (LeetCode 169)
+# ═══════════════════════════════════════════════════════════════════════════
+#
+# Problema: Encontrar el elemento que aparece más de n/2 veces.
+#
+# Ejemplo:
+#   [3,2,3]       → 3
+#   [2,2,1,1,1,2,2] → 2
+#
+# D&V: O(n log n)
+
+def elemento_mayoritario_solucion(arr):
+    if not arr:
+        return None
+
+    def dyv(lo, hi):
+        if lo == hi:
+            return arr[lo]
+
+        mid = (lo + hi) // 2
+        izq = dyv(lo, mid)
+        der = dyv(mid + 1, hi)
+
+        if izq == der:
+            return izq
+
+        c_izq = 0
+        c_der = 0
+        for i in range(lo, hi + 1):
+            if arr[i] == izq:
+                c_izq += 1
+            elif arr[i] == der:
+                c_der += 1
+
+        return izq if c_izq > c_der else der
+
+    return dyv(0, len(arr) - 1)
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# EJERCICIO 11: Contar Inversiones en un Arreglo
+# ═══════════════════════════════════════════════════════════════════════════
+#
+# Problema: Contar cuántos pares (i, j) existen con i < j y arr[i] > arr[j].
+#
+# Ejemplo:
+#   [2,4,1,3,5] → 3
+#   [1,2,3]     → 0
+#
+# D&V: O(n log n)
+
+def contar_inversiones(arr):
+    # TU CÓDIGO AQUÍ
+    pass
+
+
+def contar_inversiones_solucion(arr):
+    def dyv(nums):
+        if len(nums) <= 1:
+            return nums, 0
+
+        mid = len(nums) // 2
+        izq, inv_izq = dyv(nums[:mid])
+        der, inv_der = dyv(nums[mid:])
+
+        merged = []
+        i = j = 0
+        inv_split = 0
+
+        while i < len(izq) and j < len(der):
+            if izq[i] <= der[j]:
+                merged.append(izq[i])
+                i += 1
+            else:
+                merged.append(der[j])
+                inv_split += len(izq) - i
+                j += 1
+
+        merged.extend(izq[i:])
+        merged.extend(der[j:])
+        return merged, inv_izq + inv_der + inv_split
+
+    return dyv(arr)[1]
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# EJERCICIO 12: Máxima Suma de Subarreglo (Maximum Subarray)
+# ═══════════════════════════════════════════════════════════════════════════
+#
+# Problema: Encontrar la suma máxima de un subarreglo contiguo.
+#
+# Ejemplo:
+#   [-2,1,-3,4,-1,2,1,-5,4] → 6
+#   [1]                      → 1
+#
+# D&V: O(n log n)
+
+def max_subarreglo(arr):
+    # TU CÓDIGO AQUÍ
+    pass
+
+
+def max_subarreglo_solucion(arr):
+    if not arr:
+        return None
+
+from typing import Sequence
+
+def max_subarreglo_solucion(arr: Sequence[int]) -> int | None:
+    if not arr:
+        return None
+
+    def dyv(izq: int, der: int) -> int:
+        # Caso base: un solo elemento
+        if izq == der:
+            return arr[izq]
+
+        medio = (izq + der) // 2
+
+        mejor_izquierda = dyv(izq, medio)
+        mejor_derecha = dyv(medio + 1, der)
+
+        suma_actual = 0
+        mejor_sufijo_izquierdo = float("-inf")
+        for i in range(medio, izq - 1, -1):
+            suma_actual += arr[i]
+            mejor_sufijo_izquierdo = max(mejor_sufijo_izquierdo, suma_actual)
+
+        suma_actual = 0
+        mejor_prefijo_derecho = float("-inf")
+        for i in range(medio + 1, der + 1):
+            suma_actual += arr[i]
+            mejor_prefijo_derecho = max(mejor_prefijo_derecho, suma_actual)
+
+        mejor_cruzada = mejor_sufijo_izquierdo + mejor_prefijo_derecho
+
+        return max(mejor_izquierda, mejor_derecha, mejor_cruzada)
+
+    return dyv(0, len(arr) - 1)
+
+# ═══════════════════════════════════════════════════════════════════════════
+# EJERCICIO 13: Multiplicación Rápida de Enteros (Karatsuba)
+# ═══════════════════════════════════════════════════════════════════════════
+#
+# Problema: Multiplicar dos enteros grandes usando D&V.
+#
+# Ejemplo:
+#   1234 * 5678 → 7006652
+#
+# D&V: ~O(n^1.585)
+
+def karatsuba(x, y):
+    # TU CÓDIGO AQUÍ
+    pass
+
+
+def karatsuba_solucion(x, y):
+    signo = -1 if (x < 0) ^ (y < 0) else 1
+    x, y = abs(x), abs(y)
+
+    def dyv(a, b):
+        if a < 10 or b < 10:
+            return a * b
+
+        n = max(len(str(a)), len(str(b)))
+        m = n // 2
+        p10 = 10 ** m
+
+        a_hi, a_lo = divmod(a, p10)
+        b_hi, b_lo = divmod(b, p10)
+
+        z0 = dyv(a_lo, b_lo)
+        z2 = dyv(a_hi, b_hi)
+        z1 = dyv(a_lo + a_hi, b_lo + b_hi)
+
+        return z2 * (10 ** (2 * m)) + (z1 - z2 - z0) * p10 + z0
+
+    return signo * dyv(x, y)
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# EJERCICIO 14: Encontrar Punto Fijo en Arreglo Ordenado
+# ═══════════════════════════════════════════════════════════════════════════
+#
+# Problema: Hallar un índice i tal que arr[i] == i (si existe).
+#
+# Ejemplo:
+#   [-10,-5,0,3,7] → 3
+#   [0,2,5,8,17]   → 0
+#   [-10,-5,3,4,7] → None
+#
+# D&V: O(log n)
+
+def punto_fijo(arr, izq=0, der=None):
+    if der is None:
+        der = len(arr) - 1
+
+    if izq > der:
+        return None
+
+    medio = (izq + der) // 2
+
+    if arr[medio] == medio:
+        return medio
+
+    if arr[medio] > medio:
+        return punto_fijo(arr, izq, medio - 1)
+    else:
+        return punto_fijo(arr, medio + 1, der)
+    
+
+def punto_fijo_arr_ordenado(arr, izq=0, der=None):
+    if der is None:
+        der = len(arr) - 1
+
+    if izq > der:
+        return None
+
+    medio = (izq + der) // 2
+
+    if arr[medio] == medio:
+        return medio
+
+    if arr[medio] > medio:
+        return punto_fijo(arr, izq, medio - 1)
+    else:
+        return punto_fijo(arr, medio + 1, der)
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# EJERCICIO 15: Distancia Mínima entre Dos Valores en Arreglo
+# ═══════════════════════════════════════════════════════════════════════════
+#
+# Problema: Dado un arreglo, encontrar la mínima diferencia absoluta entre
+# dos elementos.
+#
+# Ejemplo:
+#   [8,1,5,12,10] → 2   (10 y 12, o 5 y 8)
+#
+# Idea D&V:
+#   - Ordenar con merge sort (D&V)
+#   - Buscar mínima diferencia entre vecinos
+#
+# D&V: O(n log n)
+
+def minima_diferencia_solucion(arr):
+    if len(arr) < 2:
+        return None
+
+    def merge_sort(nums):
+        if len(nums) <= 1:
+            return nums
+        m = len(nums) // 2
+        izq = merge_sort(nums[:m])
+        der = merge_sort(nums[m:])
+
+        out = []
+        i = j = 0
+        while i < len(izq) and j < len(der):
+            if izq[i] <= der[j]:
+                out.append(izq[i]); i += 1
+            else:
+                out.append(der[j]); j += 1
+        out.extend(izq[i:])
+        out.extend(der[j:])
+        return out
+
+    ordenado = merge_sort(arr)
+    mejor = float("inf")
+    for i in range(1, len(ordenado)):
+        mejor = min(mejor, ordenado[i] - ordenado[i - 1])
+    return mejor
+
+
+def minima_diferencia_estilo(arr):
+    if len(arr) < 2:
+        return None
+
+    def dyv(izq, der):
+        # Caso base: un solo elemento
+        if izq == der:
+            return [arr[izq]], float("inf")
+
+        mid = (izq + der) // 2
+
+        # Resolver izquierda y derecha
+        orden_izq, mejor_izq = dyv(izq, mid)
+        orden_der, mejor_der = dyv(mid + 1, der)
+
+        # Combinar: merge + cálculo de mejor diferencia
+        i = 0
+        j = 0
+        mezclado = []
+        mejor_total = mejor_izq if mejor_izq < mejor_der else mejor_der
+        ultimo = None
+
+        while i < len(orden_izq) and j < len(orden_der):
+            if orden_izq[i] <= orden_der[j]:
+                valor = orden_izq[i]
+                i += 1
+            else:
+                valor = orden_der[j]
+                j += 1
+
+            if ultimo is not None:
+                diff = valor - ultimo
+                if diff < mejor_total:
+                    mejor_total = diff
+
+            mezclado.append(valor)
+            ultimo = valor
+
+        while i < len(orden_izq):
+            valor = orden_izq[i]
+            i += 1
+
+            if ultimo is not None:
+                diff = valor - ultimo
+                if diff < mejor_total:
+                    mejor_total = diff
+
+            mezclado.append(valor)
+            ultimo = valor
+
+        while j < len(orden_der):
+            valor = orden_der[j]
+            j += 1
+
+            if ultimo is not None:
+                diff = valor - ultimo
+                if diff < mejor_total:
+                    mejor_total = diff
+
+            mezclado.append(valor)
+            ultimo = valor
+
+        return mezclado, mejor_total
+
+    _, respuesta = dyv(0, len(arr) - 1)
+    return respuesta
+
+
+def max_min(arreglo):
+    # CASO BASE: Es fundamental. Si no, la lista se divide infinitamente.
+    if len(arreglo) == 1:
+        return (arreglo[0], arreglo[0]) # Retornamos (mínimo, máximo)
+
+    # DIVISIÓN
+    mitad = len(arreglo) // 2
+    izquierda = arreglo[:mitad]
+    derecha = arreglo[mitad:]
+
+    # RECURSIÓN: Obtenemos el (min, max) de cada lado
+    res_izq = max_min(izquierda)
+    res_der = max_min(derecha)
+
+    # COMBINACIÓN: Comparamos los ganadores de cada lado
+    return merge_max_min(res_izq, res_der)
+
+
+def merge_max_min(izq, der):
+    """
+    Recibe dos tuplas tipo (mínimo, máximo) y las compara.
+    izq[0] es el min de la izquierda, izq[1] es el max de la izquierda.
+    """
+    # Buscamos el mínimo global entre los dos mínimos
+    min_final = izq[0] if izq[0] < der[0] else der[0]
+
+    # Buscamos el máximo global entre los dos máximos
+    max_final = izq[1] if izq[1] > der[1] else der[1]
+
+    return (min_final, max_final)
+
+# Prueba
+numeros = [20, 5, 8, 90, 2, 45]
+minimo, maximo = max_min(numeros)
+print(f"Mínimo: {minimo}, Máximo: {maximo}")
+
+
+def max_min_dv(arr, izq = 0, der = None):
+  if der is None:
+    der = len(arr) - 1
+
+  if der-izq == 1:
+    if arr[izq] < arr[der]:
+      return arr[der], arr[izq]
+    return arr[izq], arr[der]
+
+  if izq == der:
+    return arr[izq], arr[izq]
+
+  medio = (izq + der)//2
+
+  max_izq, min_izq = max_min_dv(arr, izq, medio)
+  max_der, min_der = max_min_dv(arr, medio+1, der)
+
+  return max(max_izq, max_der), min(min_izq, min_der)
+
+  numeros = [20, 5, 8, 90, 2, 45]
+
+max_min_dv(numeros)
+
+
+#La suma de los elementos de un arreglo
+
+def sum_arreglo(arr, izq = 0, der = None):
+  if der is None:
+    der = len(arr)-1
+
+  if izq == der:
+    return arr[der]
+
+  mid = (izq + der) // 2
+
+  sum_izq = sum_arreglo(arr, izq, mid)
+  sum_der = sum_arreglo(arr, mid+1, der)
+
+  return sum_izq + sum_der
+
+numeros = [1,3,4,2,1]
+
+sum_arreglo(numeros)
+
+
+#Me dan una k, cual es el número k más pequeño
+def quickselect(arr, k):
+  if len(arr) <= 1:
+    return arr
+  pivote = arr[0]
+  menores = [x for x in arr[1:] if x <= pivote]
+  mayores = [x for x in arr[1:] if x > pivote]
+
+  posicion_pivote = len(menores) + 1
+  if k == posicion_pivote:
+        return pivote
+  elif k < posicion_pivote:
+      # Está en la izquierda, buscamos en los menores
+      return quickselect(menores, k)
+  else:
+      # Está en la derecha, ajustamos k y buscamos en los mayores
+      return quickselect(mayores, k - posicion_pivote)
+
+numeros = [1, 3, 4, 2, 1]
+k = 3
+print(quickselect(numeros, k))
+
+#Promedio de los elementos de una arreglo
+
+def promedio(nums, der = None, izq = 0):
+  if der == None:
+    der = len(nums)-1
+
+  if der == izq:
+    return nums[izq] // len(nums)
+
+  medio = (izq + der) //2
+  #TERMINAR
